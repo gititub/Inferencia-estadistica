@@ -1,0 +1,196 @@
+---
+title: "PEC1_INFERÈNCIA ESTADÍSTICA"
+author: "Amelia Martínez Sequera"
+date: " Abril 2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+## Ejercicio 1
+
+a) Variable discreta X
+```{r, echo=T, include=T}
+#A
+0.1+0.25+0.3+0.15+0.1
+#B
+0.15+0.25+0.3+0.2+0.1
+```
+
+Sólo B es posible, ya que la probabilidad del espacio muestral es 1, según uno de los axiomas de Kolmogorov. La suma de las probabilidades de los sucesos tiene que ser 1.
+
+```{r, include=T, echo=TRUE}
+#P(X=7)
+a<- 0.2
+
+#P(X>=5)= P(X=5)+P(X=7)+P(X=9)
+b<- c(0.3,0.2,0.1)
+sum(b) # 0.6
+
+# P(5=<X<8) = P(X=5)+P(X=7)
+d<- c(0.3,0.2)
+sum(d) # 0.5
+
+# P(X=7|X>=5) = P(X=7)/P(X>=5)
+e<- intersect(a,b)/sum(b)
+e # 0.3333333
+
+```
+
+b) Variable continua Y.
+
+La probabilidad acumulada máxima en una distribución continua es 1. Por lo que B no es posible.
+
+P(Y=0)= 0, ya que si Y es continua la probabilidad de un punto de la recta es 0
+
+P(Y<15)= 0.7
+
+P(5<Y<15)= P(Y<15)-P(Y<5)= 0.7-0.4= 0.3
+
+P(Y>5|Y<15)= P(5>Y>15)/P(Y<15)= 0.3/0.7= 0.4285714
+```{r}
+0.3/0.7
+```
+
+
+## Ejercicio 2
+
+A y B independientes
+
+a)
+P(cura|A)=0.8
+
+P(cura|B)=0.7
+```{r}
+0.8+0.7-(0.8*0.7)
+```
+P(cura|A+B)= P(cura|A)+P(cura|B)-P(cura|A)P(cura|B) = 0.94
+
+b) El resultado es el mismo, incluso si se aplican los tratamientos a la inversa:
+
+0.8+0.7x0.2 = 0.94 
+
+0.7+0.3x0.8 = 0.94
+
+c)
+40% A
+
+60% B
+
+0.8x0.4+0.7x0.6= 0.74 = P(cura)
+
+d)Teorema de Bayes: P(A|cura)= [P(cura|A)P(A)]/P(cura)= (0.8x0.4)/0.74= 0.43
+
+e)
+```{r}
+#Podríamos calcular la suma de la P(X=16),..,P(X=20):
+x<-16:20
+y<- dbinom(16:20,20,0.8)
+data.frame("Prob"=y, row.names = x)
+plot(16:20, dbinom(16:20,20,0.8), type="h", ylab = "Probabilidad", sub="sujetos curados")
+```
+```{r}
+#pero directamente podemos calcular la probabilidad de que se cureen 16 o más sujetos si #consideramos que equivale a 1 menos la probabilidad de que se curen 15 sujetos:
+1-pbinom(15,20,0.8)
+```
+
+g)Como es una muestra grande, por la teoría del límite central la media de una muestra aleatoria sigue una distribución normal centrada en la media de la población y con una desviación estándard(sd) igual a la sd de la población dividida por la raiz cuadrada del tamaño de la muestra. La desviación estándard es el error estándard.
+```{r, echo=T, include=T}
+set.seed(2020)
+muestra <- c(rbinom(1000,20,0.8))
+media<- mean(muestra)
+sd(muestra)
+alpha<- 0.05
+cuantil<- qnorm(1-alpha/2)
+lim_inferior<- media-cuantil*sd(muestra)/sqrt(1000)
+lim_superior<- media+cuantil*sd(muestra)/sqrt(1000)
+lim_superior
+lim_inferior
+t.test(muestra, conf.level = 0.95)
+```
+Podemos calcular el intervalo de dos maneras, calculando primero la varianza (o desviación estándard), o con la t de Student si consideramos que la varianza es desconocida. El intervalo de confianza al 95% es (15.94382, 16.16818)
+
+g) Consideramos Ho: media de la muestra = media esperada
+```{r, echo=T, include=T}
+t.test(muestra, alternative ="two.sided", mu=16, conf.level = 0.95)
+```
+p-value>0.05 entonces no podemos rechazar la hipótesis nula. Podemos asumir que la media muestral es de 16. Esto ocurrirá para todos los intervalos donde el valor de significación sea inferior a 0.3275.
+
+h)
+
+```{r, echo=T, include=T}
+media<- mean(muestra)
+std<- sqrt(var(muestra))
+hist(muestra, freq = F)
+curve(dnorm(x, mean=media,sd=std), from= 10, to= 20, add = T)
+
+```
+
+
+j) Si la distribución de las medias de las muestras se acerca a una normal, si multiplicamos por 10 la muestra también lo harán la media y la desviación estándard en la misma proporción. La media pasará a estar en torno a 160, es decir habrá un cambio de posición sobre el eje x, y también de la dispersión.
+
+## Ejercicio 3
+
+a) N(160,31.4)
+
+P(Xd<100)= F(100)
+```{r}
+pnorm(100, mean = 160, sd=31.4)
+```
+el 2.8% se considerarían sanos siendo diabéticos.
+
+b) N(80,10)
+
+P(Xs>100)= 1-F(100)
+
+```{r}
+pnorm(100, mean=80, sd=10)
+1-pnorm(100, mean = 80, sd=10)
+```
+el 2.28% se clasificarian como diabéticos y en realidad estan sanos.
+
+c) P(diabético|>100)= P(>100|diabético)P(diabético)/P(>100)=
+
+= P(Xd>100)P(diabetico)/[P(Xd>100|diabetico)P(diabetico)+P(Xs>100|sano)P(sano)]=
+
+```{r}
+((1-0.02801334)*0.1)/(((1-0.02801334)*0.1)+(0.02275013*0.9))
+```
+el 82.6% de los individuos con un valor superior a 100 serán diabéticos.
+
+d)
+```{r}
+set.seed(2020)
+rnorm(20, mean=160, sd=31.4)
+mean(rnorm(20, mean=160, sd=31.4))
+alpha<- 0.05
+media<- 174.2537
+n<- 20
+varianza <- (31.4)^2
+cuantil<-qnorm(1-alpha/2)
+lim_inf<-media-cuantil*sqrt(varianza)/sqrt(n)
+lim_sup<-media+cuantil*sqrt(varianza)/sqrt(n)
+lim_inf
+lim_sup
+
+```
+se tiene el 95% de confianza de que el intervalo [160.4923,188.0151] contenga el valor medio de la población. 
+
+```{r, include=T}
+set.seed(2020)
+mean(rnorm(350, mean=160, sd=31.4))
+```
+
+```{r, include=T}
+alpha<- 0.05
+media<- 158.9736
+n<- 350
+varianza <- (31.4)^2
+cuantil<-qnorm(1-alpha/2)
+lim_inf<-media-cuantil*sqrt(varianza)/sqrt(n)
+lim_sup<-media+cuantil*sqrt(varianza)/sqrt(n)
+lim_inf
+lim_sup
+```
+se tiene el 95% de confianza de que el intervalo [155.684,162.2632] contenga el valor medio de la población.
+
+Conclusión: al aumentar el tamaño de la muestra (n), la amplitud del intervalo disminuye. Según la Teoría del Límite Central: La media muestral de un número suficientemente largo de v.a. iid se aproxima a una distribución normal (más cuanto más crece el tamaño de la muestra) centrada en la media de la población y con una distribución estándard igual a la distribución estándard de la población dividida por la raíz cuadrada del tamaño de la muestra.
